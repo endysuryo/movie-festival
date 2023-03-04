@@ -1,87 +1,144 @@
 <template>
-  <v-row justify="center" align="center">
-    <v-col cols="12" sm="8" md="6">
-      <v-card class="logo py-4 d-flex justify-center">
-        <NuxtLogo />
-        <VuetifyLogo />
-      </v-card>
-      <v-card>
-        <v-card-title class="headline">
-          Welcome to the Vuetify + Nuxt.js template
-        </v-card-title>
-        <v-card-text>
-          <p>
-            Vuetify is a progressive Material Design component framework for
-            Vue.js. It was designed to empower developers to create amazing
-            applications.
-          </p>
-          <p>
-            For more information on Vuetify, check out the
-            <a
-              href="https://vuetifyjs.com"
-              target="_blank"
-              rel="noopener noreferrer"
+  <main>
+    <h1>Watch</h1>
+    <v-container fluid>
+      <v-data-iterator
+        :items="movies"
+        :items-per-page.sync="itemsPerPage"
+        :page.sync="page"
+        :search="search"
+        :sort-by="sortBy.toLowerCase()"
+        :sort-desc="sortDesc"
+      >
+        <template #header>
+          <v-toolbar dark class="mb-1">
+            <v-text-field
+              v-model="search"
+              clearable
+              flat
+              solo-inverted
+              hide-details
+              prepend-inner-icon="mdi-magnify"
+              label="Search"
+            ></v-text-field>
+            <template v-if="$vuetify.breakpoint.mdAndUp">
+              <v-spacer></v-spacer>
+              <v-select
+                v-model="sortBy"
+                flat
+                solo-inverted
+                hide-details
+                :items="keys"
+                prepend-inner-icon="mdi-magnify"
+                label="Sort by"
+              ></v-select>
+              <v-spacer></v-spacer>
+              <v-btn-toggle v-model="sortDesc" mandatory>
+                <v-btn depressed color="blue" :value="false">
+                  <v-icon>mdi-sort-ascending</v-icon>
+                </v-btn>
+                <v-btn depressed color="blue" :value="true">
+                  <v-icon>mdi-sort-descending</v-icon>
+                </v-btn>
+              </v-btn-toggle>
+            </template>
+          </v-toolbar>
+        </template>
+
+        <template #default="props">
+          <v-row class="mt-4">
+            <v-col
+              v-for="item in props.items"
+              :key="item.title"
+              cols="12"
+              sm="6"
+              md="4"
+              lg="3"
             >
-              documentation </a
-            >.
-          </p>
-          <p>
-            If you have questions, please join the official
-            <a
-              href="https://chat.vuetifyjs.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              title="chat"
-            >
-              discord </a
-            >.
-          </p>
-          <p>
-            Find a bug? Report it on the github
-            <a
-              href="https://github.com/vuetifyjs/vuetify/issues"
-              target="_blank"
-              rel="noopener noreferrer"
-              title="contribute"
-            >
-              issue board </a
-            >.
-          </p>
-          <p>
-            Thank you for developing with Vuetify and I look forward to bringing
-            more exciting features in the future.
-          </p>
-          <div class="text-xs-right">
-            <em><small>&mdash; John Leider</small></em>
-          </div>
-          <hr class="my-3" />
-          <a
-            href="https://nuxtjs.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Nuxt Documentation
-          </a>
-          <br />
-          <a
-            href="https://github.com/nuxt/nuxt.js"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Nuxt GitHub
-          </a>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn color="primary" nuxt to="/inspire"> Continue </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-col>
-  </v-row>
+              <v-card>
+                <v-card-title class="subheading font-weight-bold">
+                  {{ item.title }}
+                  <v-chip class="ml-auto" color="orange" small>
+                    {{ item.genres }}
+                  </v-chip>
+                </v-card-title>
+                <v-divider></v-divider>
+                <v-list dense>
+                  <v-list-item>
+                    <v-list-item-content class="font-weight-light grey--text">
+                      {{ item.description }}
+                    </v-list-item-content>
+                  </v-list-item>
+                  <v-list-item>
+                    <v-list-item-content class="font-italic indigo--text">
+                      Artists: {{ item.artists }}
+                    </v-list-item-content>
+                  </v-list-item>
+                  <v-list-item>
+                    <v-icon small>mdi-eye</v-icon
+                    ><span class="text-sm-body-2 ml-2">{{ item.views }}</span>
+                  </v-list-item>
+                  <v-list-item>
+                    <v-list-item-content class="text-sm-body-2"
+                      >{{ item.duration }}
+                    </v-list-item-content>
+                    <v-btn elevation="2" icon>
+                      <v-icon
+                        dark
+                        color="success"
+                        @click="play(item.id, item.views, item.url)"
+                        >mdi-play</v-icon
+                      ></v-btn
+                    >
+                  </v-list-item>
+                </v-list>
+              </v-card>
+            </v-col>
+          </v-row>
+        </template>
+      </v-data-iterator>
+    </v-container>
+  </main>
 </template>
 
 <script>
+import { getMoviesApi, updateMoviesApi } from '~/api/movies.api'
 export default {
-  name: 'IndexPage',
+  data() {
+    return {
+      itemsPerPageArray: [4, 8, 12],
+      search: '',
+      filter: {},
+      sortDesc: false,
+      page: 1,
+      itemsPerPage: 4,
+      sortBy: 'title',
+      keys: ['Title', 'Genres', 'Artists', 'Views'],
+      movies: [],
+    }
+  },
+  computed: {
+    filteredKeys() {
+      return this.keys.filter((key) => key !== 'Name')
+    },
+  },
+  mounted() {
+    this.getMovies()
+  },
+  methods: {
+    async getMovies() {
+      this.movies = await getMoviesApi()
+    },
+    async play(id, views, url) {
+      await updateMoviesApi(id, {
+        views: views + 1,
+      }).then(() => {
+        this.getMovies()
+        if (url) {
+          window.open(url, '_blank')
+        }
+      })
+    },
+  },
 }
 </script>

@@ -54,14 +54,14 @@ export default {
           to: '/',
         },
         {
-          icon: 'mdi-chart-bubble',
-          title: 'Inspire',
-          to: '/inspire',
-        },
-        {
           icon: 'mdi-movie',
           title: 'Movies',
           to: '/movies',
+        },
+        {
+          icon: 'mdi-star',
+          title: 'Tops',
+          to: '/tops',
         },
       ],
       miniVariant: false,

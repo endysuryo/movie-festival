@@ -5,7 +5,7 @@
     <v-text-field v-model="duration" label="Duration" required></v-text-field>
     <v-textarea v-model="description" label="Description" required></v-textarea>
     <v-text-field v-model="artists" label="Artists" required></v-text-field>
-    <v-text-field v-model="genres" label="Genres" required></v-text-field>
+    <v-select v-model="genres" :items="items" label="Genres"></v-select>
     <v-text-field v-model="url" label="URL" required></v-text-field>
 
     <div class="d-flex justify-end">
@@ -24,7 +24,6 @@ import {
   createMoviesApi,
   updateMoviesApi,
 } from '~/api/movies.api'
-// import { createMoviesApi } from '~/api/movies.api'
 export default {
   data: () => ({
     id: '',
@@ -37,6 +36,7 @@ export default {
     views: 0,
     likes: [],
     dislikes: [],
+    items: ['Action', 'Horror', 'Romance', 'Comedy'],
   }),
   mounted() {
     this.getDetailMovies()
